@@ -1,12 +1,16 @@
-PATH="$PATH:~/bin"
+export PATH="$PATH:~/bin"
+export EDITOR=vim
 
 # git
 alias gs="git status"
 alias ga="git add"
-alias gd="git diff"
+alias gd="clear; git diff"
 alias gc="git commit"
 alias gca="git commit --amend"
 alias gf="git fetch"
+alias gp="git push"
+alias gr="git pull --rebase"
+alias gl="git log"
 alias diffc="diff -b -y -W $(( $(tput cols) - 2 ))"
 
 # diff the given commit against the previous commit
@@ -33,6 +37,9 @@ function gec() {
 function trash {
 	mv "$@" ~/.Trash/
 }
+
+# go up a level
+alias ..="cd .."
 
 # perform an npm install in style
 # $@ arguments to npm
@@ -97,4 +104,27 @@ function realnpm {
 function resetnpm {
 	npm set registry https://registry.npmjs.org/
 	yarn config set registry https://registry.yarnpkg.com
+}
+
+# rewrite the given commit to the given timestamp
+# $1 commit hash
+# $2 timestamp
+rewrite_commit_date () {
+  local commit="$1" date_timestamp="$2"
+  local date temp_branch="temp-rebasing-branch"
+  local current_branch="$(git rev-parse --abbrev-ref HEAD)"
+
+  if [[ -z "$commit" ]]; then
+      date=`date +'%a, %d %b %Y %H:%M:%S %z'`
+  else
+      date=`date -r "$date_timestamp" +'%a, %d %b %Y %H:%M:%S %z'`
+  fi
+
+  echo $date
+
+  git checkout -b "$temp_branch" "$commit"
+  GIT_COMMITTER_DATE="$date" git commit --amend --date "$date"
+  git checkout "$current_branch"
+  git rebase "$commit" --onto "$temp_branch"
+  git branch -d "$temp_branch"
 }
