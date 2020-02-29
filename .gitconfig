@@ -1,0 +1,12 @@
+[user]
+  email = lazdnet@gmail.com
+  name = Larry Davis
+[core]
+  excludesfile = /Users/lazdnet/.gitignore_global
+  editor = vim
+  autocrlf = input
+[alias]
+  co = checkout
+  br = branch
+  ci = commit
+  st = status
