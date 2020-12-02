@@ -153,3 +153,9 @@ rewrite_commit_author () {
   fi
   ' $commit..HEAD -- --branches --tags
 }
+
+# Find out WTF happened to the passed file
+# $1 filepath
+git_wtf () {
+  git log --full-history -- $1
+}
