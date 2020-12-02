@@ -128,3 +128,28 @@ rewrite_commit_date () {
   git rebase "$commit" --onto "$temp_branch"
   git branch -d "$temp_branch"
 }
+
+# rewrite the given commit to the given timestamp
+# $1 old_email
+# $2 new_name
+# $3 new_email
+rewrite_commit_author () {
+  local old_email="$1" new_name="$2" new_email="$3" commit="$4"
+
+  FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --env-filter '
+  WRONG_EMAIL="'"${old_email}"'"
+  NEW_NAME="'"${new_name}"'"
+  NEW_EMAIL="'"${new_email}"'"
+
+  if [ "$GIT_COMMITTER_EMAIL" = "$WRONG_EMAIL" ]
+  then
+      export GIT_COMMITTER_NAME="$NEW_NAME"
+      export GIT_COMMITTER_EMAIL="$NEW_EMAIL"
+  fi
+  if [ "$GIT_AUTHOR_EMAIL" = "$WRONG_EMAIL" ]
+  then
+      export GIT_AUTHOR_NAME="$NEW_NAME"
+      export GIT_AUTHOR_EMAIL="$NEW_EMAIL"
+  fi
+  ' $commit..HEAD -- --branches --tags
+}
