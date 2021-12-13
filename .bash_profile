@@ -2,6 +2,7 @@ export PATH="$PATH:~/bin"
 export EDITOR=vim
 
 # git
+alias g="git"
 alias gs="git status"
 alias ga="git add"
 alias gd="clear; git diff"
@@ -158,4 +159,10 @@ rewrite_commit_author () {
 # $1 filepath
 git_wtf () {
   git log --full-history -- $1
+}
+
+# Delete all local tags and fetch then authoritative copy from the remote
+git_clear_tags () {
+  git tag -l | xargs git tag -d
+  git fetch --tags
 }
