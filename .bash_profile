@@ -1,6 +1,9 @@
 export PATH="$PATH:~/bin"
 export EDITOR=vim
 
+# httpserver
+alias serve="python3 -m http.server"
+
 # git
 alias g="git"
 alias gs="git status"
@@ -10,9 +13,19 @@ alias gc="git commit"
 alias gca="git commit --amend"
 alias gf="git fetch"
 alias gp="git push"
+alias gpnv="git push --no-verify"
 alias gr="git pull --rebase"
 alias gl="git log"
+
 alias diffc="diff -b -y -W $(( $(tput cols) - 2 ))"
+
+function gpu() {
+	git push -u origin $(git rev-parse --abbrev-ref HEAD)
+}
+
+function gpunv() {
+	git push --no-verify -u origin $(git rev-parse --abbrev-ref HEAD)
+}
 
 # diff the given commit against the previous commit
 # $1 - commit hash to diff
@@ -37,6 +50,12 @@ function gec() {
 # move the specified file to the trash
 function trash {
 	mv "$@" ~/.Trash/
+}
+
+# nuke every node_modules folder in the current directory
+# https://stackoverflow.com/a/59455542/1170723
+function nukenode() {
+  find . -name 'node_modules' -type d -prune -print -exec rm -rf '{}' \;
 }
 
 # go up a level

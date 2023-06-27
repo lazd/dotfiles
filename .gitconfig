@@ -1,5 +1,5 @@
 [user]
-  email = lazdnet@gmail.com
+	email = lazdnet@gmail.com
   name = Larry Davis
 [core]
   excludesfile = ~/.gitignore_global
