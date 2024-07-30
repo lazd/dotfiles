@@ -1,0 +1,60 @@
+# Where's the repo?
+HZREPO=~/repos/hz
+
+# Hz shortcuts like rcd etc
+source $HZREPO/tools/rush/env/env.sh
+
+# Push the current branch to origin using the same name, track it
+function gpu() {
+  git push -u origin "$(git symbolic-ref --short HEAD)"
+}
+
+# Build everything except X
+function buildexceptx() {
+  cd $HZREPO/apps/project-x/web
+  rush build --to-except .
+}
+
+# Start watching X
+function watchx() {
+  cd $HZREPO/apps/project-x/web
+
+  # Disable Lit optimizations to avoid issues where --mod-* doesn't work
+  SKIP_LIT_OPTIMIZATIONS=1 rushx watch
+}
+
+# Get ready to watch
+function freshen() {
+  cd $HZREPO/apps/project-x/web
+
+  # Rebuild brick registry to avoid errors
+  rush update &&
+  buildexceptx &&
+  rushx extract-brick-metadata && rushx compile-brick-registry
+}
+
+# Run a specific test file only
+function testonly() {
+  rushx test --files "dist/**/$1.spec.js"
+}
+
+# Run a specific test file only in watch mode (broken?)
+function testwatch() {
+  CI=false rushx test:watch --files "dist/**/$1.spec.js"
+}
+
+# Freshen dependencies and build X
+function freshwatch() {
+  freshen &&
+  watchx
+}
+
+# Lint and fix everything
+function lintit() {
+  rushx lint:fix
+}
+
+# Lint and fix CSS
+function lintcss() {
+  rushx lint:css --fix
+}

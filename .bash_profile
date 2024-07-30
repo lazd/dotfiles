@@ -1,6 +1,9 @@
 export PATH="$PATH:~/bin"
 export EDITOR=vim
 
+# emacs shortcuts
+set -o emacs
+
 # httpserver
 alias serve="python3 -m http.server"
 
@@ -185,3 +188,8 @@ git_clear_tags () {
   git tag -l | xargs git tag -d
   git fetch --tags
 }
+
+# subfiles
+DOTFILESDIR=$(dirname "$0")
+
+source ${DOTFILESDIR}/.hz
