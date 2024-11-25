@@ -2,7 +2,10 @@
 HZREPO=~/repos/hz
 
 # Hz shortcuts like rcd etc
-source $HZREPO/tools/rush/env/env.sh
+if [ -e "$HZREPO" ]
+then
+  source $HZREPO/tools/rush/env/env.sh
+fi
 
 # Push the current branch to origin using the same name, track it
 function gpu() {
