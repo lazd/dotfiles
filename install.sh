@@ -59,7 +59,7 @@ fi
 
 # git ignore
 if [ "$(git config --global --includes --get core.excludesFile || true)" != "$BASEDIR/gitignore_global" ]; then
-echo "⚙️  Configuring .gitignore_global..."
+  echo "⚙️  Configuring .gitignore_global..."
   git config --global core.excludesFile "$BASEDIR/gitignore_global"
 else
   echo "✅ .gitignore_global already configured"
@@ -69,20 +69,20 @@ fi
 for file in .zshrc .bashrc; do
   if [ ! "$HOME/$file" -ef "$BASEDIR/rc" ] &&
     ! grep -Fxq "source \"$BASEDIR/rc\"" "$HOME/$file" 2>/dev/null; then
-    echo "Installing rc in $file..."
+    echo "⚙️  Installing rc in $file..."
     printf '\nsource "%s"\n' "$BASEDIR/rc" >> "$HOME/$file"
   else
-    echo "rc already installed in $file"
+    echo "✅ rc already installed in $file"
   fi
 done
 
 for file in .zprofile .bash_profile; do
   if [ ! "$HOME/$file" -ef "$BASEDIR/profile" ] &&
     ! grep -Fxq "source \"$BASEDIR/profile\"" "$HOME/$file" 2>/dev/null; then
-    echo "Installing profile in $file..."
+    echo "⚙️  Installing profile in $file..."
     printf '\nsource "%s"\n' "$BASEDIR/profile" >> "$HOME/$file"
   else
-    echo "profile already installed in $file"
+    echo "✅ profile already installed in $file"
   fi
 done
 
@@ -93,15 +93,25 @@ fi
 # starship
 source "$BASEDIR/profile"
 if ! command -v starship >/dev/null 2>&1; then
-  echo "Installing Starship prompt..."
-  if command -v brew >/dev/null 2>&1; then
-    command brew install starship
-  else
-    mkdir -p "$HOME/.local/bin"
-    command curl -fsSL https://starship.rs/install.sh | command sh -s -- -y --bin-dir "$HOME/.local/bin"
-  fi
+  echo "📦 Installing Starship prompt..."
+  mkdir -p "$HOME/.local/bin"
+  command curl -fsSL https://starship.rs/install.sh | command sh -s -- -y --bin-dir "$HOME/.local/bin"
 else
-  echo "Starship prompt already installed"
+  echo "✅ Starship prompt already installed"
+fi
+
+starship_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}"
+starship_config="$starship_config_dir/starship.toml"
+mkdir -p "$starship_config_dir"
+if [ ! "$starship_config" -ef "$BASEDIR/starship.toml" ]; then
+  if [ -e "$starship_config" ] || [ -L "$starship_config" ]; then
+    rm "$starship_config"
+    echo "🧹 Removed existing Starship config"
+  fi
+  ln -s "$BASEDIR/starship.toml" "$starship_config"
+  echo "✅ Installed Starship config"
+else
+  echo "✅ Starship config already installed"
 fi
 
 # delta
@@ -118,7 +128,7 @@ if [ "$install_delta" = true ] && ! command -v delta >/dev/null 2>&1; then
       command sudo apt install -y git-delta
     fi
   else
-    printf '%s\n' 'Error: failed to install git-delta neither brew nor apt is installed.' >&2
+    printf '%s\n' '🛑 Error: failed to install git-delta neither brew nor apt is installed.' >&2
     exit 1
   fi
 elif command -v delta >/dev/null 2>&1; then
