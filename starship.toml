@@ -8,6 +8,7 @@ truncation_length = 0
 [git_branch]
 symbol = ""
 format = "[$branch]($style) "
+style = "red"
 
 [character]
 success_symbol = "[>](green)"
