@@ -98,3 +98,7 @@ if ! command -v delta >/dev/null 2>&1; then
 else
   echo "✅ git-delta pager already installed"
 fi
+
+# reload zsh configuration
+. ~/.zshrc
+. ~/.zprofile
