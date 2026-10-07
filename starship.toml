@@ -1,4 +1,8 @@
-format = "$directory$git_branch$git_status$line_break$character"
+format = "${env_var.DOTFILES_PROMPT_MACHINE}$directory$git_branch$git_status$line_break$character"
+
+[env_var.DOTFILES_PROMPT_MACHINE]
+format = "$env_value "
+default = "💻"
 
 [directory]
 style = "purple"

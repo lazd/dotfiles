@@ -11,8 +11,15 @@ set -o emacs
 # prompt
 export STARSHIP_CONFIG="$DOTFILESDIR/../starship.toml"
 if [[ $- == *i* ]]; then
+	export DOTFILES_PROMPT_MACHINE='💻'
+	if [ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}" ]; then
+		export DOTFILES_PROMPT_MACHINE='☁️'
+	fi
 	if [ -n "${ZSH_VERSION:-}" ] && [ -f "$HOME/.pure-enabled" ] &&
 		[ -f "$HOME/.pure/pure.zsh" ]; then
+		prompt_pure_precustom() {
+			psvar[22]=$DOTFILES_PROMPT_MACHINE
+		}
 		fpath=("$HOME/.pure" $fpath)
 		autoload -U promptinit
 		promptinit
