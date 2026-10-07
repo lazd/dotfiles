@@ -16,7 +16,7 @@ if [[ $- == *i* ]]; then
 		prompt_pure_precustom() {
 			psvar[22]='💻'
 			if [ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}${PROMPT_PURE_SSH_CONNECTION:-}" ]; then
-				psvar[22]='☁️'
+				psvar[22]='☁️ '
 			fi
 		}
 		fpath=("$HOME/.pure" $fpath)
