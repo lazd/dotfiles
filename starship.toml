@@ -2,6 +2,8 @@ format = "$directory$git_branch$git_status$line_break$character"
 
 [directory]
 style = "magenta"
+truncate_to_repo = false
+truncation_length = 0
 
 [git_branch]
 symbol = ""
