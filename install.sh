@@ -76,10 +76,10 @@ if ! command -v delta >/dev/null 2>&1; then
   elif command -v apt >/dev/null 2>&1; then
     if [ "$(id -u)" -eq 0 ]; then
       command apt update
-      command apt install git-delta
+      command apt install -y git-delta
     else
       command sudo apt update
-      command sudo apt install git-delta
+      command sudo apt install -y git-delta
     fi
   else
     printf '%s\n' 'Error: failed to install git-delta neither brew nor apt is installed.' >&2
