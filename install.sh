@@ -5,16 +5,58 @@ set -euo pipefail
 
 echo "🧑🏽‍🔧 Installing lazd's dotfiles"
 
+# delete old links to dotfiles
+for file in .gitconfig .zshrc .zprofile; do
+  if [ -L "$HOME/$file" ]; then
+    target=$(readlink "$HOME/$file")
+    if [[ "$target" != /* ]]; then
+      target="$HOME/$target"
+    fi
+    target_dir=$(cd "$(dirname "$target")" 2>/dev/null && pwd -P) || continue
+    case "$target_dir/" in
+      "$BASEDIR/"*)
+        echo "🧹 Removing old symlink for $file..."
+        rm "$HOME/$file"
+        : > "$HOME/$file"
+        ;;
+    esac
+  fi
+done
+
 # git config
-echo "⚙️ Installing git config..."
-if [ -f "$HOME/.gitconfig" ] && [ ! "$HOME/.gitconfig" -ef "$BASEDIR/.gitconfig" ] &&
-  ! git config --file "$HOME/.gitconfig" --get-all include.path | grep -Fx "$BASEDIR/.gitconfig" >/dev/null; then
-  config_tmp=$(mktemp "$HOME/.gitconfig.XXXXXX")
-  git config --file "$config_tmp" include.path "$BASEDIR/.gitconfig"
-  cat "$HOME/.gitconfig" >> "$config_tmp"
-  mv "$config_tmp" "$HOME/.gitconfig"
-elif [ ! -e "$HOME/.gitconfig" ]; then
-  ln -s "$BASEDIR/.gitconfig" "$HOME/.gitconfig"
+if ! git config --global --get-all include.path | grep -Fxq -- "$BASEDIR/gitconfig_base"; then
+  echo "⚙️ Installing git config..."
+  git config --global --add include.path "$BASEDIR/gitconfig_base"
+else
+  echo "⚙️ Git config already installed"
+fi
+
+# git user info
+git_user_info_set=false
+for key in user.name user.email; do
+  if ! git config --global --includes --get "$key" >/dev/null; then
+    echo "⚙️ Setting git user information: $key..."
+    git config --global "$key" "$(git config --file "$BASEDIR/gitconfig_user" --get "$key")"
+    git_user_info_set=true
+  fi
+done
+if [ "$git_user_info_set" = false ]; then
+  echo "⚙️ Git user information already set up locally"
+fi
+
+# git ignore
+echo "⚙️ Configuring .gitignore_global..."
+git config --global core.excludesFile "$BASEDIR/gitignore_global"
+
+# profile and rc files
+echo "⚙️ Installing profile and rc files..."
+if [ ! "$HOME/.zshrc" -ef "$BASEDIR/rc" ] &&
+  ! grep -Fxq "source \"$BASEDIR/rc\"" "$HOME/.zshrc" 2>/dev/null; then
+  printf '\nsource "%s"\n' "$BASEDIR/rc" >> "$HOME/.zshrc"
+fi
+if [ ! "$HOME/.zprofile" -ef "$BASEDIR/profile" ] &&
+  ! grep -Fxq "source \"$BASEDIR/profile\"" "$HOME/.zprofile" 2>/dev/null; then
+  printf '\nsource "%s"\n' "$BASEDIR/profile" >> "$HOME/.zprofile"
 fi
 
 # pure
@@ -30,7 +72,7 @@ fi
 if ! command -v delta >/dev/null 2>&1; then
   echo "📦 Installing git-delta pager..."
   if command -v brew >/dev/null 2>&1; then
-    command brew install git-delta
+    command brew install -y git-delta
   elif command -v apt >/dev/null 2>&1; then
     if [ "$(id -u)" -eq 0 ]; then
       command apt update
@@ -45,23 +87,4 @@ if ! command -v delta >/dev/null 2>&1; then
   fi
 else
   echo "📦 git-delta pager already installed"
-fi
-
-# git ignore
-echo "⚙️ Configuring .gitignore_global..."
-while IFS= read -r pattern || [ -n "$pattern" ]; do
-  if ! grep -Fxq -- "$pattern" "$HOME/.gitignore_global" 2>/dev/null; then
-    printf '\n%s\n' "$pattern" >> "$HOME/.gitignore_global"
-  fi
-done < "$BASEDIR/.gitignore_global"
-
-# profile and rc files
-echo "⚙️ Installing profile and rc files..."
-if [ ! "$HOME/.zshrc" -ef "$BASEDIR/rc" ] &&
-  ! grep -Fxq "source \"$BASEDIR/rc\"" "$HOME/.zshrc" 2>/dev/null; then
-  printf '\nsource "%s"\n' "$BASEDIR/rc" >> "$HOME/.zshrc"
-fi
-if [ ! "$HOME/.zprofile" -ef "$BASEDIR/profile" ] &&
-  ! grep -Fxq "source \"$BASEDIR/profile\"" "$HOME/.zprofile" 2>/dev/null; then
-  printf '\nsource "%s"\n' "$BASEDIR/profile" >> "$HOME/.zprofile"
 fi
