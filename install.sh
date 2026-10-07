@@ -28,7 +28,7 @@ if ! git config --global --get-all include.path | grep -Fxq -- "$BASEDIR/gitconf
   echo "⚙️ Installing git config..."
   git config --global --add include.path "$BASEDIR/gitconfig_base"
 else
-  echo "⚙️ Git config already installed"
+  echo "✅ git config already installed"
 fi
 
 # git user info
@@ -41,22 +41,32 @@ for key in user.name user.email; do
   fi
 done
 if [ "$git_user_info_set" = false ]; then
-  echo "⚙️ Git user information already set up locally"
+  echo "✅ git user information already set up locally"
 fi
 
 # git ignore
+if [ "$(git config --global --includes --get core.excludesFile || true)" != "$BASEDIR/gitignore_global" ]; then
 echo "⚙️ Configuring .gitignore_global..."
-git config --global core.excludesFile "$BASEDIR/gitignore_global"
+  git config --global core.excludesFile "$BASEDIR/gitignore_global"
+else
+  echo "✅ .gitignore_global already configured"
+fi
 
 # profile and rc files
-echo "⚙️ Installing profile and rc files..."
 if [ ! "$HOME/.zshrc" -ef "$BASEDIR/rc" ] &&
   ! grep -Fxq "source \"$BASEDIR/rc\"" "$HOME/.zshrc" 2>/dev/null; then
+  echo "⚙️ Installing rc..."
   printf '\nsource "%s"\n' "$BASEDIR/rc" >> "$HOME/.zshrc"
+else
+  echo "✅ rc already installed"
 fi
+
 if [ ! "$HOME/.zprofile" -ef "$BASEDIR/profile" ] &&
   ! grep -Fxq "source \"$BASEDIR/profile\"" "$HOME/.zprofile" 2>/dev/null; then
+  echo "⚙️ Installing profile..."
   printf '\nsource "%s"\n' "$BASEDIR/profile" >> "$HOME/.zprofile"
+else
+  echo "✅ profile already installed"
 fi
 
 # pure
@@ -65,7 +75,7 @@ if [ ! -d "$HOME/.zsh/pure" ]; then
   mkdir -p "$HOME/.zsh"
   git clone https://github.com/sindresorhus/pure.git "$HOME/.zsh/pure"
 else 
-  echo "📦 pure prompt already installed"
+  echo "✅ pure prompt already installed"
 fi
 
 # delta
@@ -86,5 +96,5 @@ if ! command -v delta >/dev/null 2>&1; then
     return 1
   fi
 else
-  echo "📦 git-delta pager already installed"
+  echo "✅ git-delta pager already installed"
 fi
