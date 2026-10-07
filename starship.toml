@@ -1,8 +1,10 @@
-format = "${env_var.DOTFILES_PROMPT_MACHINE}$directory$git_branch$git_status$line_break$character"
+format = "${custom.machine}$directory$git_branch$git_status$line_break$character"
 
-[env_var.DOTFILES_PROMPT_MACHINE]
-format = "$env_value "
-default = "💻"
+[custom.machine]
+when = true
+shell = ["sh"]
+command = '''if [ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}${PROMPT_PURE_SSH_CONNECTION:-}" ]; then printf '☁️'; else printf '💻'; fi'''
+format = "$output "
 
 [directory]
 style = "purple"
