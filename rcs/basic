@@ -1,0 +1,29 @@
+# go up a level
+alias ..="cd .."
+
+# move the specified file to the trash
+function trash {
+	mv "$@" ~/.Trash/
+}
+
+DOTFILES_HOLDMUSIC="${${(%):-%x}:A:h:h}/holdmusic.mp3"
+function pleasehold {
+  echo "📞 Please hold..."
+	if command -v afplay >/dev/null 2>&1; then
+		afplay "$DOTFILES_HOLDMUSIC" &!
+	elif command -v mpg123 >/dev/null 2>&1; then
+		mpg123 -q "$DOTFILES_HOLDMUSIC" &!
+	else
+		"$@"
+		return $?
+	fi
+
+	local ID=$!
+
+  # run passed command
+	"$@"
+	local exit_code=$?
+
+	kill -9 "$ID" 2>/dev/null
+	return "$exit_code"
+}

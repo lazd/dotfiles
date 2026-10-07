@@ -1,5 +1,5 @@
-# pure
-fpath+=("$(brew --prefix)/share/zsh/site-functions")
+# emacs shortcuts
+set -o emacs
 
 # style
 zmodload zsh/nearcolor
@@ -12,3 +12,10 @@ fpath+=("$HOME/.zsh/pure")
 autoload -U promptinit
 promptinit
 prompt pure
+
+# subfiles
+DOTFILESDIR=$(dirname "$0")/rcs
+source ${DOTFILESDIR}/dev
+source ${DOTFILESDIR}/git
+source ${DOTFILESDIR}/hz
+source ${DOTFILESDIR}/nodenpm

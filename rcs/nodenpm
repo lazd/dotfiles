@@ -1,0 +1,56 @@
+
+# nuke every node_modules folder in the current directory
+# https://stackoverflow.com/a/59455542/1170723
+function nukenode() {
+  find . -name 'node_modules' -type d -prune -print -exec rm -rf '{}' \;
+}
+
+# perform an npm install in style
+# $@ arguments to npm
+function ni {
+	pleasehold npm install $@
+}
+
+# perform a yarn install in style
+# $@ arguments to yarn
+function yi {
+	pleasehold yarn install $@
+}
+
+# perform a yarn add in style
+# $@ arguments to yarn
+function ya {
+	pleasehold yarn add $@
+}
+
+# start a verdaccio server
+function fakenpm {
+	killall -9 Verdaccio
+	rm -rf /Users/lazd/.config/verdaccio/storage/
+	npm set registry http://localhost:4873
+	yarn config set registry http://localhost:4873
+
+	verdaccio &
+
+	sleep 2
+	/usr/bin/expect <<EOD
+spawn npm adduser
+expect {
+  "Username:" {send "lazd\r"; exp_continue}
+  "Password:" {send "testpw\r"; exp_continue}
+  "Email: (this IS public)" {send "lazdnet@gmail.com\r"; exp_continue}
+}
+EOD
+}
+
+# kill the verdaccio server, switch back to the real npm
+function realnpm {
+	killall -9 Verdaccio
+	resetnpm
+}
+
+# reset the npm registry
+function resetnpm {
+	npm set registry https://registry.npmjs.org/
+	yarn config set registry https://registry.yarnpkg.com
+}

@@ -1,12 +1,3 @@
-export PATH="$PATH:~/bin"
-export EDITOR=vim
-
-# emacs shortcuts
-set -o emacs
-
-# httpserver
-alias serve="python3 -m http.server"
-
 # git
 alias g="git"
 alias gs="git status -uno"
@@ -20,8 +11,6 @@ alias gp="git push"
 alias gpnv="git push --no-verify"
 alias gr="git pull --rebase"
 alias gl="git log"
-
-alias diffc="diff -b -y -W $(( $(tput cols) - 2 ))"
 
 function gb() {
   git checkout -b $1
@@ -70,83 +59,37 @@ function gec() {
 	git rebase --continue
 }
 
-# move the specified file to the trash
-function trash {
-	mv "$@" ~/.Trash/
+# fetch and create a branch from origin
+function gfb() {
+  git fetch origin "$1":"$1"
+  git checkout "$1"
 }
 
-# nuke every node_modules folder in the current directory
-# https://stackoverflow.com/a/59455542/1170723
-function nukenode() {
-  find . -name 'node_modules' -type d -prune -print -exec rm -rf '{}' \;
+# undo a merge
+function gum() {
+  git reset --hard ORIG_HEAD
 }
 
-# go up a level
-alias ..="cd .."
-
-# perform an npm install in style
-# $@ arguments to npm
-function ni {
-	afplay ~/.holdmusic.mp3 &
-	ID=$!
-	disown
-
-	npm install $@
-	kill -9 $ID
+# Find out WTF happened to the passed file
+# $1 filepath
+git_wtf () {
+  git log --full-history -- $1
 }
 
-# perform a yarn install in style
-# $@ arguments to yarn
-function yi {
-	afplay ~/.holdmusic.mp3 &
-	ID=$!
-	disown
-
-	yarn install $@
-	kill -9 $ID
+# Delete all local tags and fetch then authoritative copy from the remote
+git_clear_tags () {
+  git tag -l | xargs git tag -d
+  git fetch --tags
 }
 
-# perform a yarn add in style
-# $@ arguments to yarn
-function ya {
-	afplay ~/.holdmusic.mp3 &
-	ID=$!
-	disown
-
-	yarn add $@
-	kill -9 $ID
+# Push the current branch to origin using the same name, track it
+function gpu() {
+  git push -u origin "$(git symbolic-ref --short HEAD)"
 }
 
-# start a verdaccio server
-function fakenpm {
-	killall -9 Verdaccio
-	rm -rf /Users/lazd/.config/verdaccio/storage/
-	npm set registry http://localhost:4873
-	yarn config set registry http://localhost:4873
-
-	verdaccio &
-
-	sleep 2
-	/usr/bin/expect <<EOD
-spawn npm adduser
-expect {
-  "Username:" {send "lazd\r"; exp_continue}
-  "Password:" {send "testpw\r"; exp_continue}
-  "Email: (this IS public)" {send "lazdnet@gmail.com\r"; exp_continue}
-}
-EOD
-}
-
-# kill the verdaccio server, switch back to the real npm
-function realnpm {
-	killall -9 Verdaccio
-	resetnpm
-}
-
-# reset the npm registry
-function resetnpm {
-	npm set registry https://registry.npmjs.org/
-	yarn config set registry https://registry.yarnpkg.com
+# Pull the current branch from origin and rebase
+function gpr() {
+  git pull --rebase origin "$(git symbolic-ref --short HEAD)"
 }
 
 # rewrite the given commit to the given timestamp
@@ -196,20 +139,3 @@ rewrite_commit_author () {
   fi
   ' $commit..HEAD -- --branches --tags
 }
-
-# Find out WTF happened to the passed file
-# $1 filepath
-git_wtf () {
-  git log --full-history -- $1
-}
-
-# Delete all local tags and fetch then authoritative copy from the remote
-git_clear_tags () {
-  git tag -l | xargs git tag -d
-  git fetch --tags
-}
-
-# subfiles
-DOTFILESDIR=$(dirname "$0")
-
-source ${DOTFILESDIR}/.hz

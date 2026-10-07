@@ -34,17 +34,6 @@ function gfg() {
   git fetch origin refs/tags/green:refs/tags/green --force
 }
 
-# fetch and create a branch from origin
-function gfb() {
-  git fetch origin "$1":"$1"
-  git checkout "$1"
-}
-
-# undo a merge
-function gum() {
-  git reset --hard ORIG_HEAD
-}
-
 # Update your branch from green
 function gug() {
   gfg
@@ -59,16 +48,6 @@ function gbg() {
 
 function cleandevserver() {
   bazel clean --expunge; bazel shutdown; git clean -fdx; git clean -fdx -e 'common/temp' -e '**/node_modules' -e '**/.rush' -e '**/.cache' -e '**/.bazelrc.user' -e '**/bazel-*'; node common/scripts/symlink-node-modules.mjs --clean-node-modules
-}
-
-# Push the current branch to origin using the same name, track it
-function gpu() {
-  git push -u origin "$(git symbolic-ref --short HEAD)"
-}
-
-# Pull the current branch from origin and rebase
-function gpr() {
-  git pull --rebase origin "$(git symbolic-ref --short HEAD)"
 }
 
 # Start watching X
@@ -96,15 +75,6 @@ function freshen() {
   hz update npm
 }
 
-# Run a specific test file only
-function testonly() {
-  bazel run :vitest.run -- "/$1.spec.js" --coverage.enabled=false
-}
-
-function testall() {
-  bazel run :vitest.run -- --coverage.enabled=false
-}
-
 function typecheck() {
   bazel build :typecheck
 }
@@ -120,12 +90,17 @@ function lintit() {
   bazel run :lint.fix
 }
 
-# Run tests
-function testit() {
-  bazel run :wtr_test
-}
-
 # Lint and fix CSS
 function lintcss() {
   bazel run :stylelint
+}
+
+# Run tests
+function testit() {
+  bazel run :vitest.run -- "/$1.spec.js" --coverage.enabled=false
+}
+
+# Run a specific test file only
+function testonly() {
+  bazel run :vitest.run -- "/$1.spec.js" --coverage.enabled=false
 }
