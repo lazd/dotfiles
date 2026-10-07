@@ -1,21 +1,23 @@
 # emacs shortcuts
 set -o emacs
 
-# style
-zmodload zsh/nearcolor
-zstyle :prompt:pure:path color magenta
-zstyle ':prompt:pure:prompt:success' color green
-zstyle ':prompt:pure:prompt:error' color red
-
 # prompt
-fpath+=("$HOME/.zsh/pure")
-autoload -U promptinit
-promptinit
-prompt pure
+if [[ $- == *i* ]] && command -v starship >/dev/null 2>&1; then
+	if [ -n "${ZSH_VERSION:-}" ]; then
+		eval "$(starship init zsh)"
+	else
+		eval "$(starship init bash)"
+	fi
+fi
 
 # subfiles
-DOTFILESDIR=$(dirname "$0")/rcs
-source ${DOTFILESDIR}/dev
-source ${DOTFILESDIR}/git
-source ${DOTFILESDIR}/hz
-source ${DOTFILESDIR}/nodenpm
+if [ -n "${BASH_VERSION:-}" ]; then
+	DOTFILESDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/rcs
+else
+	DOTFILESDIR="${${(%):-%x}:A:h}/rcs"
+fi
+source "$DOTFILESDIR/basic"
+source "$DOTFILESDIR/dev"
+source "$DOTFILESDIR/git"
+source "$DOTFILESDIR/hz"
+source "$DOTFILESDIR/nodenpm"

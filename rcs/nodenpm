@@ -8,25 +8,25 @@ function nukenode() {
 # perform an npm install in style
 # $@ arguments to npm
 function ni {
-	pleasehold npm install $@
+	pleasehold npm install "$@"
 }
 
 # perform a yarn install in style
 # $@ arguments to yarn
 function yi {
-	pleasehold yarn install $@
+	pleasehold yarn install "$@"
 }
 
 # perform a yarn add in style
 # $@ arguments to yarn
 function ya {
-	pleasehold yarn add $@
+	pleasehold yarn add "$@"
 }
 
 # start a verdaccio server
 function fakenpm {
 	killall -9 Verdaccio
-	rm -rf /Users/lazd/.config/verdaccio/storage/
+	rm -rf "$HOME/.config/verdaccio/storage/"
 	npm set registry http://localhost:4873
 	yarn config set registry http://localhost:4873
 

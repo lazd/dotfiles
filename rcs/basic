@@ -6,13 +6,17 @@ function trash {
 	mv "$@" ~/.Trash/
 }
 
-DOTFILES_HOLDMUSIC="${${(%):-%x}:A:h:h}/holdmusic.mp3"
+if [ -n "${BASH_VERSION:-}" ]; then
+	DOTFILES_HOLDMUSIC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/holdmusic.mp3"
+else
+	DOTFILES_HOLDMUSIC="${${(%):-%x}:A:h:h}/holdmusic.mp3"
+fi
 function pleasehold {
   echo "📞 Please hold..."
 	if command -v afplay >/dev/null 2>&1; then
-		afplay "$DOTFILES_HOLDMUSIC" &!
+				afplay "$DOTFILES_HOLDMUSIC" &
 	elif command -v mpg123 >/dev/null 2>&1; then
-		mpg123 -q "$DOTFILES_HOLDMUSIC" &!
+				mpg123 -q "$DOTFILES_HOLDMUSIC" &
 	else
 		"$@"
 		return $?

@@ -1,8 +1,6 @@
 [core]
   editor = vim
   autocrlf = input
-  pager = delta
-  hooksPath = /Users/lazd/.config/git/hooks
 [alias]
   co = checkout
   br = branch
@@ -13,8 +11,6 @@
   ui = true
 [pack]
   windowMemory = 4096m
-[interactive]
-  diffFilter = delta --color-only
 [delta]
   navigate = true
 [merge]

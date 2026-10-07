@@ -1,2 +1,5 @@
-export PATH="$PATH:~/bin"
+case ":$PATH:" in
+	*":$HOME/bin:"*) ;;
+	*) export PATH="$PATH:$HOME/bin" ;;
+esac
 export EDITOR=vim

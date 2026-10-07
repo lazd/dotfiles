@@ -1,12 +1,25 @@
 #!/bin/bash
-BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -n "${BASH_VERSION:-}" ]; then
+  BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+  BASEDIR="${${(%):-%x}:A:h}"
+fi
 
+# error handling
 set -euo pipefail
+
+# read args
+install_delta=false
+for arg in "$@"; do
+  if [ "$arg" = --delta ]; then
+    install_delta=true
+  fi
+done
 
 echo "🧑🏽‍🔧 Installing lazd's dotfiles"
 
 # delete old links to dotfiles
-for file in .gitconfig .zshrc .zprofile; do
+for file in .gitconfig .zshrc .zprofile .bashrc .bash_profile; do
   if [ -L "$HOME/$file" ]; then
     target=$(readlink "$HOME/$file")
     if [[ "$target" != /* ]]; then
@@ -53,33 +66,44 @@ else
 fi
 
 # profile and rc files
-if [ ! "$HOME/.zshrc" -ef "$BASEDIR/rc" ] &&
-  ! grep -Fxq "source \"$BASEDIR/rc\"" "$HOME/.zshrc" 2>/dev/null; then
-  echo "⚙️  Installing rc..."
-  printf '\nsource "%s"\n' "$BASEDIR/rc" >> "$HOME/.zshrc"
-else
-  echo "✅ rc already installed"
+for file in .zshrc .bashrc; do
+  if [ ! "$HOME/$file" -ef "$BASEDIR/rc" ] &&
+    ! grep -Fxq "source \"$BASEDIR/rc\"" "$HOME/$file" 2>/dev/null; then
+    echo "Installing rc in $file..."
+    printf '\nsource "%s"\n' "$BASEDIR/rc" >> "$HOME/$file"
+  else
+    echo "rc already installed in $file"
+  fi
+done
+
+for file in .zprofile .bash_profile; do
+  if [ ! "$HOME/$file" -ef "$BASEDIR/profile" ] &&
+    ! grep -Fxq "source \"$BASEDIR/profile\"" "$HOME/$file" 2>/dev/null; then
+    echo "Installing profile in $file..."
+    printf '\nsource "%s"\n' "$BASEDIR/profile" >> "$HOME/$file"
+  else
+    echo "profile already installed in $file"
+  fi
+done
+
+if ! grep -Eq '(^|[[:space:]])(source|\.)[[:space:]].*\.bashrc' "$HOME/.bash_profile"; then
+  printf '\n[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"\n' >> "$HOME/.bash_profile"
 fi
 
-if [ ! "$HOME/.zprofile" -ef "$BASEDIR/profile" ] &&
-  ! grep -Fxq "source \"$BASEDIR/profile\"" "$HOME/.zprofile" 2>/dev/null; then
-  echo "⚙️  Installing profile..."
-  printf '\nsource "%s"\n' "$BASEDIR/profile" >> "$HOME/.zprofile"
+# starship
+if ! command -v starship >/dev/null 2>&1; then
+  echo "Installing Starship prompt..."
+  if command -v brew >/dev/null 2>&1; then
+    command brew install starship
+  else
+    command curl -fsSL https://starship.rs/install.sh | command sh -s -- -y
+  fi
 else
-  echo "✅ profile already installed"
-fi
-
-# pure
-if [ ! -d "$HOME/.zsh/pure" ]; then
-  echo "📦 Installing pure prompt..."
-  mkdir -p "$HOME/.zsh"
-  git clone https://github.com/sindresorhus/pure.git "$HOME/.zsh/pure"
-else 
-  echo "✅ pure prompt already installed"
+  echo "Starship prompt already installed"
 fi
 
 # delta
-if ! command -v delta >/dev/null 2>&1; then
+if [ "$install_delta" = true ] && ! command -v delta >/dev/null 2>&1; then
   echo "📦 Installing git-delta pager..."
   if command -v brew >/dev/null 2>&1; then
     command brew install -y git-delta
@@ -93,34 +117,15 @@ if ! command -v delta >/dev/null 2>&1; then
     fi
   else
     printf '%s\n' 'Error: failed to install git-delta neither brew nor apt is installed.' >&2
-    return 1
+    exit 1
   fi
-else
+elif command -v delta >/dev/null 2>&1; then
   echo "✅ git-delta pager already installed"
 fi
 
-if ! command -v zsh >/dev/null 2>&1; then
-  echo "📦 Installing zsh..."
-  if [ "$(id -u)" -eq 0 ]; then
-    command apt update
-    command apt install -y zsh
-  else
-    command sudo -n apt update
-    command sudo -n apt install -y zsh
-  fi
-else
-  echo "✅ zsh already installed"
+if command -v delta >/dev/null 2>&1; then
+  git config --global core.pager delta
+  git config --global interactive.diffFilter 'delta --color-only'
 fi
 
-if [ "${SHELL##*/}" != zsh ]; then
-  echo "⚙️  Setting zsh as the default shell..."
-  if [ "$(id -u)" -eq 0 ]; then
-    command chsh -s "$(command -v zsh)" "$(id -un)"
-  else
-    command sudo -n chsh -s "$(command -v zsh)" "$(id -un)"
-  fi
-else
-  echo "✅ zsh already configured as the default shell"
-fi
-
-echo "Open a new terminal to load the zsh configuration."
+echo "✨ Open a new terminal to load the shell configuration!"
