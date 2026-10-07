@@ -25,7 +25,7 @@ done
 
 # git config
 if ! git config --global --get-all include.path | grep -Fxq -- "$BASEDIR/gitconfig_base"; then
-  echo "⚙️ Installing git config..."
+  echo "⚙️  Installing git config..."
   git config --global --add include.path "$BASEDIR/gitconfig_base"
 else
   echo "✅ git config already installed"
@@ -35,7 +35,7 @@ fi
 git_user_info_set=false
 for key in user.name user.email; do
   if ! git config --global --includes --get "$key" >/dev/null; then
-    echo "⚙️ Setting git user information: $key..."
+    echo "⚙️  Setting git user information: $key..."
     git config --global "$key" "$(git config --file "$BASEDIR/gitconfig_user" --get "$key")"
     git_user_info_set=true
   fi
@@ -46,7 +46,7 @@ fi
 
 # git ignore
 if [ "$(git config --global --includes --get core.excludesFile || true)" != "$BASEDIR/gitignore_global" ]; then
-echo "⚙️ Configuring .gitignore_global..."
+echo "⚙️  Configuring .gitignore_global..."
   git config --global core.excludesFile "$BASEDIR/gitignore_global"
 else
   echo "✅ .gitignore_global already configured"
@@ -55,7 +55,7 @@ fi
 # profile and rc files
 if [ ! "$HOME/.zshrc" -ef "$BASEDIR/rc" ] &&
   ! grep -Fxq "source \"$BASEDIR/rc\"" "$HOME/.zshrc" 2>/dev/null; then
-  echo "⚙️ Installing rc..."
+  echo "⚙️  Installing rc..."
   printf '\nsource "%s"\n' "$BASEDIR/rc" >> "$HOME/.zshrc"
 else
   echo "✅ rc already installed"
@@ -63,7 +63,7 @@ fi
 
 if [ ! "$HOME/.zprofile" -ef "$BASEDIR/profile" ] &&
   ! grep -Fxq "source \"$BASEDIR/profile\"" "$HOME/.zprofile" 2>/dev/null; then
-  echo "⚙️ Installing profile..."
+  echo "⚙️  Installing profile..."
   printf '\nsource "%s"\n' "$BASEDIR/profile" >> "$HOME/.zprofile"
 else
   echo "✅ profile already installed"
