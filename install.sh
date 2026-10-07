@@ -16,8 +16,10 @@ if command -v brew >/dev/null 2>&1; then
   command brew install git-delta
 elif command -v apt >/dev/null 2>&1; then
   if [ "$(id -u)" -eq 0 ]; then
+    command apt update
     command apt install git-delta
   else
+    command sudo apt update
     command sudo apt install git-delta
   fi
 else
