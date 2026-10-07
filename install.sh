@@ -91,12 +91,14 @@ if ! grep -Eq '(^|[[:space:]])(source|\.)[[:space:]].*\.bashrc' "$HOME/.bash_pro
 fi
 
 # starship
+source "$BASEDIR/profile"
 if ! command -v starship >/dev/null 2>&1; then
   echo "Installing Starship prompt..."
   if command -v brew >/dev/null 2>&1; then
     command brew install starship
   else
-    command curl -fsSL https://starship.rs/install.sh | command sh -s -- -y
+    mkdir -p "$HOME/.local/bin"
+    command curl -fsSL https://starship.rs/install.sh | command sh -s -- -y --bin-dir "$HOME/.local/bin"
   fi
 else
   echo "Starship prompt already installed"
