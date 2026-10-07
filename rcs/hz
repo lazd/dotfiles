@@ -1,5 +1,12 @@
 # Where's the repo?
 HZREPO=~/repos/hz
+if [[ ! -d "$HZREPO" ]]; then
+  if [[ -d ~/hz ]]; then
+    HZREPO=~/hz
+  else
+    echo "🛑 hz repo not checked out in expected location"
+  fi
+fi
 
 # ssh fix
 export NODE_EXTRA_CA_CERTS="$HZREPO/tools/build/ssl/ca.pem"
@@ -83,6 +90,11 @@ function typecheck() {
 function freshwatch() {
   freshen &&
   watchx
+}
+
+# Prettify everything
+function prettify() {
+  bazel run :oxfmt
 }
 
 # Lint and fix everything
