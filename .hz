@@ -1,12 +1,6 @@
 # Where's the repo?
 HZREPO=~/repos/hz
 
-# Hz shortcuts like rcd etc
-if [ -e "$HZREPO" ]
-then
-  source $HZREPO/tools/rush/env/env.sh
-fi
-
 # ssh fix
 export NODE_EXTRA_CA_CERTS="$HZREPO/tools/build/ssl/ca.pem"
 
