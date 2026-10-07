@@ -99,6 +99,28 @@ else
   echo "✅ git-delta pager already installed"
 fi
 
-# reload zsh configuration
-. ~/.zshrc
-. ~/.zprofile
+if ! command -v zsh >/dev/null 2>&1; then
+  echo "📦 Installing zsh..."
+  if [ "$(id -u)" -eq 0 ]; then
+    command apt update
+    command apt install -y zsh
+  else
+    command sudo -n apt update
+    command sudo -n apt install -y zsh
+  fi
+else
+  echo "✅ zsh already installed"
+fi
+
+if [ "${SHELL##*/}" != zsh ]; then
+  echo "⚙️  Setting zsh as the default shell..."
+  if [ "$(id -u)" -eq 0 ]; then
+    command chsh -s "$(command -v zsh)" "$(id -un)"
+  else
+    command sudo -n chsh -s "$(command -v zsh)" "$(id -un)"
+  fi
+else
+  echo "✅ zsh already configured as the default shell"
+fi
+
+echo "Open a new terminal to load the zsh configuration."
