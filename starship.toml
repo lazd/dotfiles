@@ -1,0 +1,12 @@
+format = "$directory$git_branch$git_status$line_break$character"
+
+[directory]
+style = "magenta"
+
+[git_branch]
+symbol = ""
+format = "[$branch]($style) "
+
+[character]
+success_symbol = "[>](green)"
+error_symbol = "[>](red)"
