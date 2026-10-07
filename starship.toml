@@ -6,10 +6,12 @@ truncate_to_repo = false
 truncation_length = 0
 
 [git_branch]
-symbol = ""
 format = "[$branch]($style) "
-style = "red"
+style = "bright-black"
+
+[git_status]
+disabled = true
 
 [character]
-success_symbol = "[>](green)"
-error_symbol = "[>](red)"
+success_symbol = "[❯](green)"
+error_symbol = "[❯](red)"
