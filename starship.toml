@@ -9,7 +9,7 @@ format = "$symbol "
 [custom.ssh]
 when = '''[ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}${PROMPT_PURE_SSH_CONNECTION:-}" ]'''
 shell = ["sh"]
-symbol = "☁︎"
+symbol = "☁️"
 format = "$symbol "
 
 [directory]
