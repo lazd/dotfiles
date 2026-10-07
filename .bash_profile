@@ -9,7 +9,8 @@ alias serve="python3 -m http.server"
 
 # git
 alias g="git"
-alias gs="git status"
+alias gs="git status -uno"
+alias gsd="git status" # git status dos lol
 alias ga="git add"
 alias gd="clear; git diff"
 alias gc="git commit"
@@ -22,10 +23,29 @@ alias gl="git log"
 
 alias diffc="diff -b -y -W $(( $(tput cols) - 2 ))"
 
-function gpu() {
-	git push -u origin $(git rev-parse --abbrev-ref HEAD)
+function gb() {
+  git checkout -b $1
 }
 
+function gbl() {
+  git branch --sort=-committerdate
+}
+
+function gpl() {
+  git pull origin $(git rev-parse --abbrev-ref HEAD)
+}
+
+# Pull the current branch from origin and rebase
+function grb() {
+  git pull --rebase origin "$(git symbolic-ref --short HEAD)"
+}
+
+# Push the current branch to origin using the same name, track it
+function gpu() {
+  git push -u origin "$(git symbolic-ref --short HEAD)"
+}
+
+# Push the current branch to origin using the same name, track it, and don't run verification
 function gpunv() {
 	git push --no-verify -u origin $(git rev-parse --abbrev-ref HEAD)
 }

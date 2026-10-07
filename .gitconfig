@@ -1,10 +1,12 @@
 [user]
-	email = lazdnet@gmail.com
+  email = lazdnet@gmail.com
   name = Larry Davis
 [core]
   excludesfile = ~/.gitignore_global
   editor = vim
   autocrlf = input
+  pager = delta
+  hooksPath = /Users/lazd/.config/git/hooks
 [alias]
   co = checkout
   br = branch
@@ -12,4 +14,12 @@
   st = status
   p = push
 [color]
-	ui = true
+  ui = true
+[pack]
+  windowMemory = 4096m
+[interactive]
+  diffFilter = delta --color-only
+[delta]
+  navigate = true
+[merge]
+  conflictStyle = zdiff3

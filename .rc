@@ -7,6 +7,8 @@ zstyle :prompt:pure:path color magenta
 zstyle ':prompt:pure:prompt:success' color green
 zstyle ':prompt:pure:prompt:error' color red
 
-
-autoload -U promptinit; promptinit
+# prompt
+fpath+=("$HOME/.zsh/pure")
+autoload -U promptinit
+promptinit
 prompt pure
