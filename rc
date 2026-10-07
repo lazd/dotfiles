@@ -10,11 +10,23 @@ set -o emacs
 
 # prompt
 export STARSHIP_CONFIG="$DOTFILESDIR/../starship.toml"
-if [[ $- == *i* ]] && command -v starship >/dev/null 2>&1; then
-	if [ -n "${ZSH_VERSION:-}" ]; then
-		eval "$(starship init zsh)"
-	else
-		eval "$(starship init bash)"
+if [[ $- == *i* ]]; then
+	if [ -n "${ZSH_VERSION:-}" ] && [ -f "$HOME/.pure-enabled" ] &&
+		[ -f "$HOME/.pure/pure.zsh" ]; then
+		fpath=("$HOME/.pure" $fpath)
+		autoload -U promptinit
+		promptinit
+		prompt pure
+		zmodload zsh/nearcolor
+		zstyle :prompt:pure:path color magenta
+		zstyle ':prompt:pure:prompt:success' color green
+		zstyle ':prompt:pure:prompt:error' color red
+	elif command -v starship >/dev/null 2>&1; then
+		if [ -n "${ZSH_VERSION:-}" ]; then
+			eval "$(starship init zsh)"
+		else
+			eval "$(starship init bash)"
+		fi
 	fi
 fi
 

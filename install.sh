@@ -10,9 +10,12 @@ set -euo pipefail
 
 # read args
 install_delta=false
+install_pure=false
 for arg in "$@"; do
   if [ "$arg" = --delta ]; then
     install_delta=true
+  elif [ "$arg" = --pure ]; then
+    install_pure=true
   fi
 done
 
@@ -90,28 +93,38 @@ if ! grep -Eq '(^|[[:space:]])(source|\.)[[:space:]].*\.bashrc' "$HOME/.bash_pro
   printf '\n[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"\n' >> "$HOME/.bash_profile"
 fi
 
-# starship
+# prompt
 source "$BASEDIR/profile"
-if ! command -v starship >/dev/null 2>&1; then
-  echo "📦 Installing Starship prompt..."
-  mkdir -p "$HOME/.local/bin"
-  command curl -fsSL https://starship.rs/install.sh | command sh -s -- -y --bin-dir "$HOME/.local/bin"
-else
-  echo "✅ Starship prompt already installed"
-fi
-
-starship_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}"
-starship_config="$starship_config_dir/starship.toml"
-mkdir -p "$starship_config_dir"
-if [ ! "$starship_config" -ef "$BASEDIR/starship.toml" ]; then
-  if [ -e "$starship_config" ] || [ -L "$starship_config" ]; then
-    rm "$starship_config"
-    echo "🧹 Removed existing Starship config"
+if [ "$install_pure" = true ]; then
+  if [ ! -f "$HOME/.pure/pure.zsh" ]; then
+    echo "📦 Installing Pure prompt..."
+    git clone https://github.com/sindresorhus/pure.git "$HOME/.pure"
+  else
+    echo "✅ Pure prompt already installed"
   fi
-  ln -s "$BASEDIR/starship.toml" "$starship_config"
-  echo "✅ Installed Starship config"
+  touch "$HOME/.pure-enabled"
 else
-  echo "✅ Starship config already installed"
+  if ! command -v starship >/dev/null 2>&1; then
+    echo "📦 Installing Starship prompt..."
+    mkdir -p "$HOME/.local/bin"
+    command curl -fsSL https://starship.rs/install.sh | command sh -s -- -y --bin-dir "$HOME/.local/bin"
+  else
+    echo "✅ Starship prompt already installed"
+  fi
+
+  starship_config="$HOME/.config/starship.toml"
+  mkdir -p "$HOME/.config"
+  if [ ! "$starship_config" -ef "$BASEDIR/starship.toml" ]; then
+    if [ -e "$starship_config" ] || [ -L "$starship_config" ]; then
+      rm "$starship_config"
+      echo "🧹 Removed existing Starship config"
+    fi
+    ln -s "$BASEDIR/starship.toml" "$starship_config"
+    echo "⚙️  Installed Starship config"
+  else
+    echo "✅ Starship config already installed"
+  fi
+  rm -f "$HOME/.pure-enabled"
 fi
 
 # delta
