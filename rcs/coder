@@ -1,0 +1,22 @@
+function coderinstancename {
+  printf '%s\n' "${1:-${CODER_INSTANCE:-lazd-test}}"
+}
+
+function coderopen {
+  local instance_name="$(coderinstancename "$@")"
+  local ports=8080:8080,7001:7001,8097:8097,9230:9230,8250:8250,8765:8765
+  coder port-forward "$instance_name" --tcp $ports &
+  sleep 3
+  open https://localhost.adobe.com:8080
+  fg %+
+}
+
+function coderssh {
+  local instance_name="$(coderinstancename "$@")"
+  coder ssh "$instance_name"
+}
+
+function coderinstance {
+  export CODER_INSTANCE="$(coderinstancename "$@")"
+  printf '%s\n' "$CODER_INSTANCE"
+}
