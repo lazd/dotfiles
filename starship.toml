@@ -1,6 +1,6 @@
-format = "${env_var.STARSHIP_SESSION_ICON}$directory$git_branch$git_status$line_break$character"
+format = "${env_var.SESSION_ICON}$directory$git_branch$git_status$line_break$character"
 
-[env_var.STARSHIP_SESSION_ICON]
+[env_var.SESSION_ICON]
 format = "$env_value "
 
 [directory]

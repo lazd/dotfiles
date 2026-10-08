@@ -11,13 +11,15 @@ set -o emacs
 # prompt
 export STARSHIP_CONFIG="$DOTFILESDIR/../starship.toml"
 if [[ $- == *i* ]]; then
+	if [ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}${PROMPT_PURE_SSH_CONNECTION:-}" ]; then
+		export SESSION_ICON="☁️ "
+	else
+		export SESSION_ICON="💻"
+	fi
 	if [ -n "${ZSH_VERSION:-}" ] && [ -f "$HOME/.pure-enabled" ] &&
 		[ -f "$HOME/.pure/pure.zsh" ]; then
 		prompt_pure_precustom() {
-			psvar[22]='💻'
-			if [ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}${PROMPT_PURE_SSH_CONNECTION:-}" ]; then
-				psvar[22]='☁︎'
-			fi
+			psvar[22]="$SESSION_ICON"
 		}
 		fpath=("$HOME/.pure" $fpath)
 		autoload -U promptinit
@@ -28,11 +30,7 @@ if [[ $- == *i* ]]; then
 		zstyle ':prompt:pure:prompt:success' color green
 		zstyle ':prompt:pure:prompt:error' color red
 	elif command -v starship >/dev/null 2>&1; then
-		if [ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}${PROMPT_PURE_SSH_CONNECTION:-}" ]; then
-			export STARSHIP_SESSION_ICON="☁️ "
-		else
-			export STARSHIP_SESSION_ICON="💻"
-		fi
+
 		if [ -n "${ZSH_VERSION:-}" ]; then
 			eval "$(starship init zsh)"
 		else
