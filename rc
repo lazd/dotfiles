@@ -28,6 +28,11 @@ if [[ $- == *i* ]]; then
 		zstyle ':prompt:pure:prompt:success' color green
 		zstyle ':prompt:pure:prompt:error' color red
 	elif command -v starship >/dev/null 2>&1; then
+		if [ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}${PROMPT_PURE_SSH_CONNECTION:-}" ]; then
+			export STARSHIP_SESSION_ICON="☁️ "
+		else
+			export STARSHIP_SESSION_ICON="💻"
+		fi
 		if [ -n "${ZSH_VERSION:-}" ]; then
 			eval "$(starship init zsh)"
 		else

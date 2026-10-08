@@ -1,16 +1,7 @@
-format = "${custom.machine}${custom.ssh}$directory$git_branch$git_status$line_break$character"
+format = "${env_var.STARSHIP_SESSION_ICON}$directory$git_branch$git_status$line_break$character"
 
-[custom.machine]
-when = '''[ -z "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}${PROMPT_PURE_SSH_CONNECTION:-}" ]'''
-shell = ["sh"]
-symbol = "💻"
-format = "$symbol "
-
-[custom.ssh]
-when = '''[ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}${PROMPT_PURE_SSH_CONNECTION:-}" ]'''
-shell = ["sh"]
-symbol = "☁️"
-format = "$symbol  "
+[env_var.STARSHIP_SESSION_ICON]
+format = "$env_value "
 
 [directory]
 style = "purple"
