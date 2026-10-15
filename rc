@@ -39,10 +39,17 @@ if [[ $- == *i* ]]; then
 	fi
 fi
 
-# subfiles
+# general subfiles
 source "$DOTFILESDIR/basic"
 source "$DOTFILESDIR/dev"
 source "$DOTFILESDIR/git"
-source "$DOTFILESDIR/hz"
 source "$DOTFILESDIR/nodenpm"
-source "$DOTFILESDIR/coder"
+
+if [ "$(hostname)" = "Adobe" ]; then
+	# work subfiles
+  source "$DOTFILESDIR/hz"
+	source "$DOTFILESDIR/coder"
+else
+  # personal subfiles
+	source "$DOTFILESDIR/minimac"
+fi

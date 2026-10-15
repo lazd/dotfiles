@@ -5,6 +5,7 @@ if [[ ! -d "$HZREPO" ]]; then
     HZREPO=~/hz
   else
     echo "🛑 hz repo not checked out in expected location"
+    exit
   fi
 fi
 

@@ -1,0 +1,28 @@
+# extmount
+function extmount() {
+  linux_id=$(diskutil list | awk '
+    /^[[:space:]]*[0-9]+:/ && $0 ~ /Linux[[:space:]]/ {
+      print $NF
+      exit
+    }
+  ')
+
+  if [[ -n "$linux_id" ]]; then
+    echo "💾 Found Linux drive at /dev/$linux_id"
+    sudo ~/repos/ext4fuse/ext4fuse "/dev/$linux_id" ~/ext4mount -o allow_other,defer_permissions
+    open ~/ext4mount
+  else
+    echo "🛑 Linux volume not found" >&2
+    exit 1
+  fi
+}
+
+function extunmount() {
+  sudo umount ~/ext4mount
+}
+
+# minimac upload func
+function macupload() {
+  echo "🛜 Uploading $1..."
+  scp "$1" lazd@192.168.1.194:~/Unix/
+}
