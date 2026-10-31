@@ -3,10 +3,12 @@ HZREPO=~/repos/hz
 if [[ ! -d "$HZREPO" ]]; then
   if [[ -d ~/hz ]]; then
     HZREPO=~/hz
-  else
-    echo "🛑 hz repo not checked out in expected location"
-    exit
   fi
+fi
+
+# do nothing if HZ not present
+if [[ ! -d "$HZREPO" ]]; then
+  exit
 fi
 
 # ssh fix

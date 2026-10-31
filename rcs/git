@@ -139,3 +139,59 @@ rewrite_commit_author () {
   fi
   ' $commit..HEAD -- --branches --tags
 }
+
+worktree() {
+  # 1. Ensure a branch name was actually provided
+  if [ -z "$1" ]; then
+    echo "Error: Please provide a branch name."
+    echo "Usage: worktree <branch-name>"
+    return 1
+  fi
+
+  # 2. Get the current directory name
+  local repo_name
+  repo_name=$(basename "$(pwd)")
+
+  local folder="../${repo_name}-$1"
+
+  # 3. Check if the folder exists, if so, stop
+  if [ -e "$folder" ]; then
+    echo "Error: Folder '$folder' already exists."
+    return 1
+  fi
+
+  # 4. Create the worktree with a unique folder name
+  if ! git worktree add "$folder" -b "$1"; then
+    echo "Error: Failed to create worktree."
+    return 1
+  fi
+
+  cd $folder || return 1
+}
+
+delworktree() {
+  # 1. Ensure a branch name was actually provided
+  if [ -z "$1" ]; then
+    echo "Error: Please provide a branch name."
+    echo "Usage: worktree <branch-name>"
+    return 1
+  fi
+
+  # 2. Get the current directory name
+  local repo_name
+  repo_name=$(basename "$(pwd)")
+
+  local folder="../${repo_name}-$1"
+
+  # 3. Check if the folder exists, if so, stop
+  if [ ! -e "$folder" ]; then
+    echo "Error: Folder '$folder' does not exist."
+    return 1
+  fi
+
+  # 4. Remove the worktree
+  if ! git worktree remove $folder; then
+    echo "Error: Failed to remove worktree."
+    return 1
+  fi
+}

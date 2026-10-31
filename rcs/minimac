@@ -26,3 +26,7 @@ function macupload() {
   echo "🛜 Uploading $1..."
   scp "$1" lazd@192.168.1.194:~/Unix/
 }
+
+function macssh() {
+  ssh 192.168.1.194
+}
