@@ -44,11 +44,11 @@ source "$DOTFILESDIR/basic"
 source "$DOTFILESDIR/dev"
 source "$DOTFILESDIR/git"
 source "$DOTFILESDIR/nodenpm"
-
 if [ "$(hostname)" = "Adobe" ]; then
 	# work subfiles
-  source "$DOTFILESDIR/hz"
+	source "$DOTFILESDIR/hz"
 	source "$DOTFILESDIR/coder"
+	source "$DOTFILESDIR/android"
 else
   # personal subfiles
 	source "$DOTFILESDIR/minimac"

@@ -29,6 +29,11 @@ function grb() {
   git pull --rebase origin "$(git symbolic-ref --short HEAD)"
 }
 
+# Rebase the current branch onto another branch
+function grbonto() {
+  git rebase --onto $1 $2 "$(git symbolic-ref --short HEAD)"
+}
+
 # Push the current branch to origin using the same name, track it
 function gpu() {
   git push -u origin "$(git symbolic-ref --short HEAD)"

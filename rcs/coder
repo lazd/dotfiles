@@ -1,3 +1,5 @@
+command -v coder >/dev/null 2>&1 || return
+
 function coderinstancename {
   printf '%s\n' "${1:-${CODER_INSTANCE:-lazd-test}}"
 }

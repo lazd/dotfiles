@@ -31,3 +31,54 @@ function pleasehold {
 	kill -9 "$ID" 2>/dev/null
 	return "$exit_code"
 }
+
+# Play a sound and show a Notification Center notification
+# Usage: lznotify <sound file> <title> <message> [terminal-notifier options...]
+function lznotify {
+	local sound="$1" title="$2" message="$3"
+	shift 3
+	if command -v afplay >/dev/null 2>&1 && [[ -f "$sound" ]]; then
+		(afplay "$sound" >/dev/null 2>&1 &)
+	fi
+	if command -v terminal-notifier >/dev/null 2>&1; then
+		(terminal-notifier -title "$title" -message "$message" -group "lznotify-$title" "$@" >/dev/null 2>&1 &)
+	elif command -v osascript >/dev/null 2>&1; then
+		(osascript -e "display notification \"$message\" with title \"$title\"" >/dev/null 2>&1 &)
+	fi
+}
+
+# Set both window and tab titles. Usage: lztitle "Title"
+function lztitle {
+	if [[ -t 1 ]]; then
+		printf '\033]0;%s\007\033]1;%s\007' "$1" "$1"
+	fi
+}
+
+# Pipe command output through this to suppress OSC 0/1/2 title overrides.
+function lzfiltertitles {
+	/usr/bin/perl -e '
+    $| = 1;
+    my $buffer = "";
+    while (1) {
+      my $count = sysread(STDIN, my $chunk, 65536);
+      die "Reading command output: $!\n" unless defined $count;
+      last unless $count;
+      $buffer .= $chunk;
+      while (length $buffer) {
+        if ($buffer =~ s/\A([^\e]+)//) {
+          print $1;
+        } elsif ($buffer eq "\e") {
+          last;
+        } elsif (substr($buffer, 0, 2) ne "\e]") {
+          print substr($buffer, 0, 1, "");
+        } elsif ($buffer =~ s/\A(\e\](.*?)(?:\a|\e\\))//s) {
+          my ($sequence, $payload) = ($1, $2);
+          print $sequence unless $payload =~ /\A[012];/;
+        } else {
+          last;
+        }
+      }
+    }
+    print $buffer;
+  '
+}

@@ -18,6 +18,14 @@ alias update-npm="hz update npm"
 
 alias update-and-gen="update-npm && gen-bazel-build"
 
+function hzrepo() {
+  cd $HZREPO
+}
+
+function sharedui() {
+  cd $HZREPO/platform/ui/components/shared-ui-components
+}
+
 function bulldozer() {
   cd $HZREPO
   ./tools/buildozer 'remove data' //common/bazel:%workspace_files
@@ -60,20 +68,54 @@ function cleandevserver() {
   bazel clean --expunge; bazel shutdown; git clean -fdx; git clean -fdx -e 'common/temp' -e '**/node_modules' -e '**/.rush' -e '**/.cache' -e '**/.bazelrc.user' -e '**/bazel-*'; node common/scripts/symlink-node-modules.mjs --clean-node-modules
 }
 
+# Sounds live in the dotfiles root, one level above rcs/
+HZ_SOUND_SUCCESS="$DOTFILESDIR/../whit.wav"
+HZ_SOUND_FAILURE="$DOTFILESDIR/../pong2003.wav"
+
+# Run a command, playing a sound + showing a notification on build success/failure
+# Usage: buildnotify "Name" command [args...]
+function buildnotify() {
+  local name="$1"
+  shift
+  lztitle "📦 $name"
+  # script runs the command in a pseudo-terminal so in-place progress output (e.g. bazel's) keeps updating
+  script -q /dev/null "$@" | lzfiltertitles | tee >(_buildnotify_watch "$name")
+}
+
+function _buildnotify_watch() {
+  local name="${1:-Build}" line now last_alert=0
+  while IFS= read -r line; do
+    now=$(date +%s)
+    # Errors often span many lines; only alert once per burst
+    (( now - last_alert < 3 )) && continue
+    case "$line" in
+      *"Build did NOT complete successfully"*|*"FAILED: Build"*|*"ERROR: "*|*"Compilation failed"*|*"compiled with"*"error"*|*"Compilation finished with"*"error"*)
+        last_alert=$now
+        lznotify "$HZ_SOUND_FAILURE" "$name build failed" "❌ $name failed to compile" -activate com.apple.Terminal
+        ;;
+      *"Compilation finished"*|*"Target "*"up-to-date"*)
+        last_alert=$now
+        lznotify "$HZ_SOUND_SUCCESS" "$name build finished" "✅ $name compiled successfully" -activate com.apple.Terminal
+        ;;
+    esac
+  done
+}
+
 # Start watching X
 function startx() {
   cd $HZREPO/apps/project-x/web
-  bazel run rspack_bundle_dev.serve --watch
+  buildnotify "Express" bazel run rspack_bundle_dev.serve --watch
 }
 alias watchx="startx"
 
 function startnimbus() {
   cd $HZREPO/apps/nimbus/web
-  bazel run :rspack_bundle_dev.serve --watch
+  buildnotify "Nimbus" bazel run :rspack_bundle_dev.serve --watch
 }
 
 function startai() {
-  bazel run //services/ai-assistant-service:start
+  lztitle "🤖 Assistant Service"
+  script -q /dev/null bazel run //services/ai-assistant-service:start | lzfiltertitles
 }
 
 function startaisharp() {
@@ -118,4 +160,9 @@ function testit() {
 # Run a specific test file only
 function testonly() {
   bazel run :vitest.run -- "/$1.spec.js" --coverage.enabled=false
+}
+
+function hzresetlockfiles() {
+  cd $HZREPO
+  git checkout main -- common/bazel/pnpm-lock.yaml
 }
