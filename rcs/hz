@@ -64,6 +64,29 @@ function gbg() {
   git checkout -b $1 green --no-track
 }
 
+# Usage: greenworktree <branch-suffix>
+function greenworktree() {
+  if [ "$#" -ne 1 ] || [ -z "$1" ]; then
+    echo "Error: Please provide a branch suffix."
+    echo "Usage: greenworktree <branch-suffix>"
+    return 1
+  fi
+
+  local folder="../$1"
+  if [ -e "$folder" ]; then
+    echo "Error: Folder '$folder' already exists."
+    return 1
+  fi
+
+  gfg || return 1
+  if ! git worktree add "$folder" -b "lazd/$1" green --no-track; then
+    echo "Error: Failed to create worktree."
+    return 1
+  fi
+
+  cd "$folder" || return 1
+}
+
 function cleandevserver() {
   bazel clean --expunge; bazel shutdown; git clean -fdx; git clean -fdx -e 'common/temp' -e '**/node_modules' -e '**/.rush' -e '**/.cache' -e '**/.bazelrc.user' -e '**/bazel-*'; node common/scripts/symlink-node-modules.mjs --clean-node-modules
 }
