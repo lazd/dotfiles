@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ -n "${BASH_VERSION:-}" ]; then
-  BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 else
   BASEDIR="${${(%):-%x}:A:h}"
 fi

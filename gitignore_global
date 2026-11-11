@@ -1,2 +1,3 @@
 .DS_Store
 lazdIgnore/
+**/.claude/settings.local.json
