@@ -178,25 +178,118 @@ delworktree() {
   # 1. Ensure a branch name was actually provided
   if [ -z "$1" ]; then
     echo "Error: Please provide a branch name."
-    echo "Usage: worktree <branch-name>"
+    echo "Usage: delworktree <branch-name>"
     return 1
   fi
 
-  # 2. Get the current directory name
-  local repo_name
-  repo_name=$(basename "$(pwd)")
+  # 2. Find the worktree for that branch (works from any worktree, any path)
+  local folder wt_path line
+  while IFS= read -r line; do
+    case "$line" in
+      "worktree "*) wt_path="${line#worktree }" ;;
+      "branch refs/heads/$1") folder="$wt_path" ;;
+    esac
+  done < <(git worktree list --porcelain)
 
-  local folder="../${repo_name}-$1"
+  if [ -z "$folder" ]; then
+    echo "Error: No worktree found for branch '$1'."
+    return 1
+  fi
 
-  # 3. Check if the folder exists, if so, stop
-  if [ ! -e "$folder" ]; then
-    echo "Error: Folder '$folder' does not exist."
+  # 3. Never remove the worktree we're standing in
+  if [ "$folder" = "$(git rev-parse --show-toplevel)" ]; then
+    echo "Error: '$1' is the current worktree. cd elsewhere first."
     return 1
   fi
 
   # 4. Remove the worktree
-  if ! git worktree remove $folder; then
+  if git worktree remove "$folder" 2>/dev/null; then
+    return 0
+  fi
+
+  # 5. Removal failed (e.g. submodules present). Only force if everything is clean.
+  if [ -n "$(git -C "$folder" status --porcelain 2>/dev/null)" ]; then
+    echo "Error: Worktree '$folder' has uncommitted changes. Not removing."
+    return 1
+  fi
+
+  local sub
+  while IFS= read -r sub; do
+    [ -z "$sub" ] && continue
+    if [ -n "$(git -C "$folder/$sub" status --porcelain 2>/dev/null)" ]; then
+      echo "Error: Submodule '$sub' has uncommitted changes. Not removing."
+      return 1
+    fi
+    if [ -n "$(git -C "$folder/$sub" rev-list HEAD --not --remotes 2>/dev/null)" ]; then
+      echo "Error: Submodule '$sub' has local commits not on a remote. Not removing."
+      return 1
+    fi
+  done < <(git -C "$folder" submodule foreach --quiet --recursive 'echo $displaypath' 2>/dev/null)
+
+  # 6. Everything is clean, force delete
+  if ! git worktree remove --force "$folder"; then
     echo "Error: Failed to remove worktree."
     return 1
   fi
+}
+
+worktreelist() {
+  git worktree list
+}
+
+worktreeunmerged() {
+  # Show worktrees whose branch is not merged into the current branch,
+  # or which have uncommitted changes (staged, unstaged or untracked)
+  local wt_path branch line reason
+  while IFS= read -r line; do
+    case "$line" in
+      "worktree "*) wt_path="${line#worktree }" ;;
+      "branch "*)
+        branch="${line#branch }"
+        # Skip the current branch
+        [ "$branch" = "$(git symbolic-ref -q HEAD)" ] && continue
+        reason=""
+        if ! git merge-base --is-ancestor "$branch" HEAD 2>/dev/null; then
+          reason="unmerged"
+        fi
+        if [ -n "$(git -C "$wt_path" status --porcelain 2>/dev/null)" ]; then
+          reason="${reason:+$reason, }uncommitted changes"
+        fi
+        [ -n "$reason" ] && echo "${wt_path}  [${branch#refs/heads/}] ($reason)"
+        ;;
+    esac
+  done < <(git worktree list --porcelain)
+}
+
+worktreecleanup() {
+  # Remove all worktrees that worktreeunmerged does not list
+  # (branch merged into HEAD and no uncommitted changes).
+  # Usage: worktreecleanup [-n]   (-n = dry run)
+  local dry=0
+  [ "$1" = "-n" ] && dry=1
+
+  local main_wt wt_path branch line blocked
+  main_wt=$(git worktree list --porcelain | sed -n '1s/^worktree //p')
+  blocked=$(worktreeunmerged)
+
+  while IFS= read -r line; do
+    case "$line" in
+      "worktree "*) wt_path="${line#worktree }" ;;
+      "branch "*)
+        branch="${line#branch }"
+        [ "$wt_path" = "$main_wt" ] && continue
+        [ "$branch" = "$(git symbolic-ref -q HEAD)" ] && continue
+        if printf '%s\n' "$blocked" | grep -Fq -- "$wt_path  ["; then
+          echo "Skipping $(printf '%s\n' "$blocked" | grep -F -- "$wt_path  [" | head -n1)"
+          continue
+        fi
+        if [ "$dry" = 1 ]; then
+          echo "Would remove $wt_path [${branch#refs/heads/}]"
+        else
+          echo "Removing $wt_path [${branch#refs/heads/}]"
+          delworktree "${branch#refs/heads/}"
+        fi
+        ;;
+    esac
+  done < <(git worktree list --porcelain)
 }
